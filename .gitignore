@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+shot_token.txt
+.env
+.env.*
+产物/
