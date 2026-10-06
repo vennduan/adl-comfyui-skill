@@ -197,9 +197,13 @@ token 在服务器的 `shot_token.txt`（权限 600），启动日志第一行�
       {"name": "智伯", "portrait": "E01_S03_智伯_定妆照.png",
        "portrait_download": "/file/E01_S03_%E6%99%BA%E4%BC%AF_%E5%AE%9A%E5%A6%86%E7%85%A7.png"}
     ],
+    "voiceover": "E01_S03_旁白.flac",
+    "voiceover_download": "/file/E01_S03_%E5%B9%A3%E7%99%BD.flac",
     "files": [
       {"role": "portrait", "label": "定妆照", "file": "E01_S03_智伯_定妆照.png",
-       "renamed_from": "定妆照_正面全身像_00026_.png", "size": 983447}
+       "renamed_from": "定妆照_正面全身像_00026_.png", "size": 983447},
+      {"role": "voiceover", "label": "旁白", "file": "E01_S03_旁白.flac",
+       "renamed_from": "tts/旁白_00001_.flac", "size": 231044}
     ]
   }
 }
@@ -207,6 +211,21 @@ token 在服务器的 `shot_token.txt`（权限 600），启动日志第一行�
 
 不传 `shot_id` 时保持 ComfyUI 原名（`分镜视频_00020_.mp4`）—— 但**生产环境
 强烈建议传**，见下。
+
+---
+
+## 音频交付：两条路，别搞混
+
+| | 走哪 | 产物 | 要不要后期 |
+|---|---|---|---|
+| **角色对白** | H3 自己生成，写在 `shot.prompt` 里的台词会被念出来并对上口型 | 在 `video_download` 那个 mp4 里 | **不要**，音画一体 |
+| **旁白**（`voiceover` 字段） | 独立跑 IndexTTS2 | `voiceover_download` 指向的 `.flac` | **要**，自己叠到画面上 |
+
+旁白是画外音，画面里没有人在说它，H3 没有这个表达通道，所以只能单独合成。
+拿到 `.flac` 用 `ffmpeg -i 视频.mp4 -i 旁白.flac -c copy 输出.mp4` 叠上去即可。
+
+**`voiceover` 为 `null` 说明这次任务没提交旁白** —— 不是接口坏了。
+确认提交了 `{ "voiceover": {"text": "..."} }` 之后仍然为 `null`，才是真出问题。
 
 ---
 
