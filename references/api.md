@@ -73,8 +73,38 @@ token 在服务器的 `shot_token.txt`（权限 600），启动日志第一行�
 | `shot.voice` | string | 必须在 `input/` 里 | 音色参考。给一段人声，角色就用这个音色说话 |
 | `shot.steps` | int | **4~40** | 采样步数。8=试片，20=交付 |
 | `shot.turbo` | bool | | 是否挂 turbo LoRA。只有 `steps<=8` 时才有意义 |
-| `characters` | list | **1~7 个** | 每项要 `positive`（英文描述）；`name` 随便填；`seed` 建议给，**同角色全程用同一个** |
+| `characters` | list | **1~7 个** | 每项要 `positive`（英文描述）；`name` 随便填；`seed` 建议给，**同角色全程用同一个**。可选 `view` 见下 |
 | `voiceover` | object | 可选 | `{ "text": "...", "voice": "..." }`，`voice` 不给就沿用 `shot.voice`。`text` 上限 2000 字 |
+
+### `characters[].view` —— 角色定妆照的视角
+
+可选，不给就是 `正面全身像`。合法值就这五个，**写别的会静默回落到默认值**（不报错，很容易以为生效了）：
+
+| 值 | 出图 |
+|---|---|
+| `正面全身像` | 全身，默认 |
+| `侧面半身像` | 胸上半身 |
+| `四十五度半身像` | 四分之三侧半身 |
+| `面部特写` | 比头像更紧，切到脸中部 |
+| `四视图拼图` | 2×2 四视图拼图 |
+
+**拿资产的四视图不受 `view` 开关控制。** 每一镜的四个视角分支本来就会全跑
+（拼图早就算出来了），所以不管 `view` 选哪个，都会**另外存一份 2×2 拼图**：
+
+```json
+"characters": [{"name": "智伯", "view": "正面全身像",
+                "portrait": "E01_S01_智伯_定妆照.png",
+                "four_view": "E01_S01_智伯_四视图.png",
+                "four_view_download": "/file/E01_S01_%E6%99%BA%E4%BC%AF_%E5%9B%9B%E8%A7%86%E5%9B%BE.png"}]
+```
+
+- `four_view` —— **资产用的四视图**（2×2 拼图），下载路径在 `four_view_download`
+- `portrait` —— 喂给视频生成的参考图，即 `view` 选中的那个视角
+
+⚠️ **别把 `four_view` 当参考图喂 H3**：视频链路走的是 `portrait`。
+把 2×2 拼图塞进 `input/` 当参考图会掉画质。四视图就当静态资产存着用。
+
+给 `shot_id` 的话产物会按 `{shot_id}_{角色名}_{用途}.png` 重命名，方便直接归档。
 
 > `prompt` 这一栏是接口契约；**提示词正文怎么写见 `prompting.md`**，
 > 那里有实测过的硬规则（「导演指令词会被当台词念出来」等）和翻车案例。
@@ -118,10 +148,14 @@ token 在服务器的 `shot_token.txt`（权限 600），启动日志第一行�
   "error": null,
   "result": {
     "seconds": 421.0,
-    "characters": [{"name": "智伯", "portrait": "定妆照_正面全身像_00026_.png"}],
+    "characters": [{"name": "智伯", "view": "正面全身像",
+                    "portrait": "定妆照_正面全身像_00026_.png",
+                    "four_view": "智伯_四视图_00001_.png"}],
     "video": "分镜视频_00020_.mp4",
     "ambient": null,
-    "voiceover": null
+    "voiceover": null,
+    "files": [{"role": "four_view", "label": "四视图",
+               "file": "智伯_四视图_00001_.png", "size": 1187432}]
   },
   "elapsed": 421.0,
   "queue_depth": 1

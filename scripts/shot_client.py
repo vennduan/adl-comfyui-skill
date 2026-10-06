@@ -133,6 +133,8 @@ def _result_paths(result):
     for ch in result.get("characters") or []:
         if ch.get("portrait"):
             add(ch.get("portrait_download") or "/file/" + _q(ch["portrait"]))
+        if ch.get("four_view"):
+            add(ch.get("four_view_download") or "/file/" + _q(ch["four_view"]))
     if result.get("voiceover"):
         add("/file/" + _q(result["voiceover"]))
     return items
